@@ -1,0 +1,239 @@
+# Purpose: Investigate trends and make some plots
+# Author: Tim Essam, Ph.D
+# Date: 2019/06/14
+# 
+
+library(ggrepel)
+# Load data and investigate -----------------------------------------------
+
+theme_line <- theme_xygrid(projector = TRUE) +
+  theme(legend.position = "none",
+        strip.text = element_text(hjust = 0, size = 12)) 
+  
+subtitle <- c("Points above grey area indicate levels above the national average")
+y_axix_pct <- list( scale_y_continuous(
+  labels = scales::percent_format(accuracy = 1)
+  # breaks = seq(0, 1, by = 0.25)
+))
+
+# Change names to read as character vector not factor for mergabliity later on
+gha_sf1 <- st_read(file.path(gispath, "GHA_adm1.shp"), stringsAsFactors = FALSE)
+
+excel_sheets(file.path(datapath, "2019_Ghana_Indicators.xlsx"))
+
+ghana_data_path <- file.path(datapath, "2019_Ghana_Indicators.xlsx")
+
+gha_df <- 
+  excel_sheets(ghana_data_path) %>% 
+  set_names() %>% 
+  map(read_excel, path = ghana_data_path)
+glimpse(gha_df)
+
+setdiff(gha_sf1$NAME_1, gha_df$Stunting$Region)
+
+gha_df$Stunting <- 
+  gha_df$Stunting %>% 
+  mutate(NAME_1 = str_squish(Region))
+
+stunting_ntl_ave <- 
+  gha_df$Stunting %>% 
+  filter(NAME_1 == "National")
+
+
+gha_df$Stunting %>% 
+  mutate(Region_sort = fct_reorder(Region, Value, .desc = TRUE),
+         text = ifelse(NAME_1 == "Northern" & Year == 1998, "national average", "")) %>% 
+  filter(NAME_1 != "National") %>% 
+  ggplot(aes(x = Year, y = Value)) +
+  geom_area(data = stunting_ntl_ave, aes(x = Year, y = Value), 
+            fill = grey10K, size = 1, alpha = 0.85) +
+  geom_line(colour = grey40K, size = 0.5) + 
+  geom_point(aes(fill = Value), size = 4, colour = grey80K, shape = 21) + 
+  #geom_text(aes(y = .25, label = text), vjust = 4, size = 4, colour = grey60K) +
+  theme_line +
+  facet_wrap(~Region_sort) + 
+  scale_x_continuous(breaks = seq(1990, 2020, by = 5)) +
+  scale_y_continuous(
+    labels = scales::percent_format(accuracy = 1)
+    # breaks = seq(0, 1, by = 0.25)
+  ) +
+  scale_fill_viridis_c(option = "A", direction = -1) +
+
+  labs(title = "Northern Region has the highest levels of stunting",
+       subtitle = subtitle,
+       x = "", y = "",
+       caption = "Data from DHS & MICS surveys")
+  
+  
+
+# Poverty Region  ------------------------------------------------------------
+gha_df$Population %>% print(n = Inf)
+gha_df$Population %>% 
+  filter(Regions != "Totals country") %>% 
+  ggplot(aes(x = year, colour = Regions)) +
+  geom_line(aes(y = Male)) +
+  geom_line(aes(y = Female)) 
+
+
+
+# Poverty by region -------------------------------------------------------
+
+gha_df$Poverty_region %>% 
+  filter(Indicator == "Poverty incidence") %>% 
+  mutate(Region_sort = fct_reorder(Region, Value, .desc = TRUE)) %>%
+  ggplot(aes(x = Year, group = Region)) +
+  geom_area(aes(y = National_ave), fill = grey10K, size = 1, alpha = 0.85) +
+  geom_line(aes(y = Value), colour = grey40K, size = 0.5) + 
+  facet_wrap(~Region_sort) +
+  geom_point(aes(y = Value, fill = Value), size = 4, colour = grey80K, shape = 21) +
+  scale_x_continuous(limits = c(2005, 2020)) +
+  scale_fill_viridis_c(option = "C", direction = -1) +
+  theme_line +
+  labs(title = "Upper West region has highest poverty levels",
+       subtitle = subtitle)
+
+
+# Family Planning ---------------------------------------------------------
+
+gha_df$Fertility_Region %>% 
+  mutate(Region_sort = fct_reorder(Region, `adolescent birth rate`),
+         reg_color = ifelse(Region == "National", grey40K, grey20K)) %>% 
+  gather("indicator", "value", `adolescent birth rate`:`demand for family planning`) %>% 
+  mutate(indicator_sort = fct_reorder(indicator, value, .desc = TRUE)) %>% 
+  ggplot(aes(y = value, x = Region_sort, fill = reg_color)) +
+  coord_flip() + geom_col() +
+  facet_wrap(~indicator_sort, scales = "free_x") +
+  scale_fill_identity() +
+  theme_line +
+  y_axix_pct + 
+  labs(title = "Family planning and birth rates by region",
+       subtitle = "Note free scales to accomodate indicator ranges",
+       x = "", y = "",
+       caption = "2018 Multiple Indicator Cluster Survey (MICS)")
+
+
+# GDP Sectoral Composition  --------------------------------------------------------------------
+gha_df$`GDP Sectoral_Share` %>% 
+  mutate(label = if_else(Year == max(Year), as.character(Sector), NA_character_)) %>% 
+  ggplot(aes(x = Year, y = Value, group = Sector, colour = Sector)) +
+  geom_line(size = 1) +
+  scale_color_manual(values=c("#a6d854", "#e5c494", "#e78ac3")) +
+  theme_line +
+  scale_x_continuous(limits = c(2004, 2020)) +
+  scale_y_continuous(limits = c(0, 0.75),
+                     labels = scales::percent_format(accuracy = 1)) +
+  geom_label_repel(aes(label = label),
+                     nudge_x = 1,
+                     na.rm = TRUE, segment.size = 0) +
+  labs(x = "", y = "",
+       title = "Services constitute the largest share of overall gross domestic product",
+       subtitle = "While the overall share is shrining, agriculture has surged in recent years",
+       caption = "Source: Ghana Statistical Service")
+
+  gha_df$`Gdp Growth` %>% 
+    ggplot(aes(x = Year, y = Value, group = Indicator)) +
+    geom_line(colour = grey40K, size = 0.5) + 
+    geom_point(aes(y = Value, fill = Value), size = 4, colour = grey80K, shape = 21) +
+    facet_wrap(~Indicator) +
+    theme_line + 
+    scale_x_continuous(limits = c(2004, 2020)) +
+    labs(x = "", y = "", 
+         title = "GDP growth has been strong in recent years, while inflation is near average",
+         subtitle = "High growth is associated with periods of low inflation") +
+    scale_fill_viridis_c(option = "D", direction = -1) +
+    scale_y_continuous(limits = c(0, 0.25),
+                       labels = scales::percent_format(accuracy = 1)) +
+    theme(strip.text = element_text(size = 20))
+    
+
+# Access to services ------------------------------------------------------
+
+gha_df$Service_Access %>% 
+    mutate(Region_sort = fct_reorder(Region, Value)) %>%
+    mutate(label = if_else(Year == max(Year) & Region == "Upper East", as.character(Indicator), NA_character_)) %>% 
+    ggplot(aes(x = Year, y = Value, group = Indicator, colour = Indicator)) +
+    geom_line(size = 1) + 
+    geom_point() +
+    facet_wrap(~Region_sort) +
+    theme_line +
+    scale_color_manual(values = c("#7570b3", "#1b9e77")) +
+    scale_x_continuous(limits = c(2004, 2020)) +
+    scale_y_continuous(limits = c(0, 1),
+                       labels = scales::percent_format(accuracy = 1)) +
+    geom_label_repel(aes(label = label),
+                     na.rm = TRUE, segment.size = 0) +
+    labs(x = "", y = "",
+         title = "Regions in Northern Ghana continue to lag behind in terms of access to electricty and improved toilets",
+         subtitle = "Electricity access has grown faster than improved toilet access",
+         caption = "Source: 2017 Ghana Living Standards Survey")
+    
+    
+
+# ICT Use -----------------------------------------------------------------
+gha_df$`ICT USe` %>% 
+    mutate(Region_sort = fct_reorder(Region, `mobile use`)) %>% 
+    gather(indicator, value, `Computer use`:`ICT activity`) %>%  
+    mutate(indicator_sort = fct_reorder(indicator, value, .desc = TRUE)) %>% 
+    ggplot(aes(x = Region_sort, y = indicator_sort)) +
+    geom_tile(aes(fill = value), color = grey90K) +
+    geom_text(aes(label = percent(value)), colour = "black") +
+    scale_fill_viridis_c(
+      direction = -1, alpha = .80,
+      option = "D", label = percent_format(accuracy = 2), 
+    ) + # format labels in legend
+    theme_minimal() +
+    #coord_fixed(ratio = 1.5) + # Fix the size of the squares
+    facet_wrap(~Sex, ncol = 2) + coord_flip() +
+    theme_line
+
+# Dumbell plot may be better here
+  library(ggalt)  
+
+  gha_df$`ICT USe` %>% 
+    gather(indicator, value, `Computer use`:`ICT activity`) %>%  
+    mutate(indicator_sort = fct_reorder(indicator, value, .desc = TRUE)) %>% 
+    spread(Sex, value) %>% 
+    filter(indicator == "mobile use") %>% 
+    mutate(Region_sort = fct_reorder(Region, male),
+           diff = male - female) %>% 
+    ggplot(aes(x = female, xend = male, y = Region_sort)) +
+    geom_dumbbell( colour_x="#fc8d62", 
+                   colour_xend = "#a6d854", 
+                   color = grey40K,
+                   size_x = 5,
+                   size_xend = 5) + facet_wrap(~indicator_sort) +
+    theme_line + theme_xgrid(projector = TRUE) +
+    scale_x_continuous(limits = c(0, 1),
+                       labels = scales::percent_format(accuracy = 1)) +
+    labs(x = "", 
+         y = "", 
+         title = "Men use mobile phones more than women",
+         subtitle = "Upper West Region lags behind in terms of women's use",
+         caption = "Source: 2017 Multiple Indicator Cluster Survey (MICS)")
+  
+    
+    
+    gha_df$`ICT USe` %>% 
+    gather(indicator, value, `Computer use`:`ICT activity`) %>%  
+    mutate(indicator_sort = fct_reorder(indicator, value, .desc = TRUE)) %>% 
+    spread(Sex, value) %>% 
+    filter(indicator != "mobile use") %>% 
+    mutate(Region_sort = fct_reorder(Region, male),
+           diff = male - female) %>% 
+    ggplot(aes(x = female, xend = male, y = Region_sort)) +
+    geom_dumbbell(colour_x="#fc8d62", size = 2,
+                   colour_xend = "#a6d854", 
+                   color = grey40K,
+                   size_x = 5,
+                   size_xend = 5) + facet_wrap(~indicator_sort) +
+    theme_line + theme_xygrid(projector = TRUE) + 
+    scale_x_continuous(limits = c(0, 1),
+                       labels = scales::percent_format(accuracy = 1)) +
+    labs(x = "", 
+         y = "", 
+         title = "Men use more information communication technology than women",
+         subtitle = "The gaps is greatest in areas with the heaviest use",
+         caption = "Source: 2017 Multiple Indicator Cluster Survey (MICS)")
+    
+  
+                             
