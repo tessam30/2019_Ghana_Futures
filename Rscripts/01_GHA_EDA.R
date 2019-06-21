@@ -190,19 +190,20 @@ gha_df$`ICT USe` %>%
   library(ggalt)  
 
   gha_df$`ICT USe` %>% 
-    gather(indicator, value, `Computer use`:`ICT activity`) %>%  
+    gather(indicator, value, `Computer use`:`One ICT activity`) %>%  
     mutate(indicator_sort = fct_reorder(indicator, value, .desc = TRUE)) %>% 
     spread(Sex, value) %>% 
-    filter(indicator == "mobile use") %>% 
+    filter(indicator == "Mobile use") %>% 
     mutate(Region_sort = fct_reorder(Region, male),
            diff = male - female) %>% 
     ggplot(aes(x = female, xend = male, y = Region_sort)) +
     geom_dumbbell( colour_x="#fc8d62", 
                    colour_xend = "#a6d854", 
                    color = grey40K,
-                   size_x = 5,
-                   size_xend = 5) + facet_wrap(~indicator_sort) +
-    theme_line + theme_xgrid(projector = TRUE) +
+                   size = 2,
+                   size_x = 6,
+                   size_xend = 6) + facet_wrap(~indicator_sort) +
+    theme_line + theme_xygrid(projector = TRUE) +
     scale_x_continuous(limits = c(0, 1),
                        labels = scales::percent_format(accuracy = 1)) +
     labs(x = "", 
@@ -214,26 +215,30 @@ gha_df$`ICT USe` %>%
     
     
     gha_df$`ICT USe` %>% 
-    gather(indicator, value, `Computer use`:`ICT activity`) %>%  
+    gather(indicator, value, `Computer use`:`One ICT activity`) %>%  
     mutate(indicator_sort = fct_reorder(indicator, value, .desc = TRUE)) %>% 
     spread(Sex, value) %>% 
-    filter(indicator != "mobile use") %>% 
+    filter(indicator != "Mobile use") %>% 
     mutate(Region_sort = fct_reorder(Region, male),
            diff = male - female) %>% 
     ggplot(aes(x = female, xend = male, y = Region_sort)) +
     geom_dumbbell(colour_x="#fc8d62", size = 2,
                    colour_xend = "#a6d854", 
                    color = grey40K,
-                   size_x = 5,
-                   size_xend = 5) + facet_wrap(~indicator_sort) +
+                   size_x = 6,
+                   size_xend = 6) + facet_wrap(~indicator_sort) +
     theme_line + theme_xygrid(projector = TRUE) + 
     scale_x_continuous(limits = c(0, 1),
                        labels = scales::percent_format(accuracy = 1)) +
     labs(x = "", 
          y = "", 
-         title = "Men use more information communication technology than women",
-         subtitle = "The gaps is greatest in areas with the heaviest use",
+         title = "Men use  information communication technology more than women",
+         subtitle = "The gap is greatest in areas with the heaviest use",
          caption = "Source: 2017 Multiple Indicator Cluster Survey (MICS)")
-    
+
+
+# New section -------------------------------------------------------------
+
+        
   
                              
