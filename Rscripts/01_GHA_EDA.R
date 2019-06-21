@@ -78,7 +78,7 @@ gha_df$Population %>%
 
 # Poverty by region -------------------------------------------------------
 
-gha_df$Poverty_region %>% 
+pov_plot <- gha_df$Poverty_region %>% 
   filter(Indicator == "Poverty incidence") %>% 
   mutate(Region_sort = fct_reorder(Region, Value, .desc = TRUE)) %>%
   ggplot(aes(x = Year, group = Region)) +
@@ -89,8 +89,26 @@ gha_df$Poverty_region %>%
   scale_x_continuous(limits = c(2005, 2020)) +
   scale_fill_viridis_c(option = "C", direction = -1) +
   theme_line +
-  labs(title = "Upper West region has highest poverty levels",
+  labs(title = "Upper West region has the highest poverty levels",
        subtitle = subtitle)
+
+gini_plot <- 
+  gha_df$Poverty_region %>% 
+  filter(Indicator == "Gini coefficient") %>% 
+  mutate(Region_sort = fct_reorder(Region, Value, .desc = TRUE)) %>%
+  ggplot(aes(x = Year, group = Region)) +
+  geom_area(aes(y = National_ave), fill = grey10K, size = 1, alpha = 0.85) +
+  geom_line(aes(y = Value), colour = grey40K, size = 0.5) + 
+  facet_wrap(~Region_sort) +
+  geom_point(aes(y = Value, fill = Value), size = 4, colour = grey80K, shape = 21) +
+  scale_x_continuous(limits = c(2005, 2020)) +
+  scale_fill_viridis_c(option = "C", direction = -1) +
+  theme_line +
+  labs(title = "Upper West region has the highest gini coefficient levels",
+       subtitle = str_c(subtitle, "\n", "A higher coefficient indicates more inequality"),
+                        x = "", 
+                        y = "",
+                        caption = "Source: 2017 Ghana Living Standards Survey")
 
 
 # Family Planning ---------------------------------------------------------
@@ -113,7 +131,7 @@ gha_df$Fertility_Region %>%
 
 
 # GDP Sectoral Composition  --------------------------------------------------------------------
-gha_df$`GDP Sectoral_Share` %>% 
+gdp_shares <- gha_df$`GDP Sectoral_Share` %>% 
   mutate(label = if_else(Year == max(Year), as.character(Sector), NA_character_)) %>% 
   ggplot(aes(x = Year, y = Value, group = Sector, colour = Sector)) +
   geom_line(size = 1) +
@@ -130,7 +148,7 @@ gha_df$`GDP Sectoral_Share` %>%
        subtitle = "While the overall share is shrining, agriculture has surged in recent years",
        caption = "Source: Ghana Statistical Service")
 
-  gha_df$`Gdp Growth` %>% 
+gdp_growth <-   gha_df$`Gdp Growth` %>% 
     ggplot(aes(x = Year, y = Value, group = Indicator)) +
     geom_line(colour = grey40K, size = 0.5) + 
     geom_point(aes(y = Value, fill = Value), size = 4, colour = grey80K, shape = 21) +

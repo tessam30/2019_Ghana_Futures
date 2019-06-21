@@ -1,0 +1,75 @@
+---
+title: "Ghana Scenario Planning Notes"
+output: html_notebook
+---
+
+
+### Poverty Profile Report 2005 - 2017 
+
+##### GDP Growth and Inflation
+* Average annual growth was 6.8 percent  
+* In 2017, Ghana was one of the fastest growing economies in the world
+* Weaker fiscal and monetary policies, terms of trade shocks from lower oil prices, and electricity rationing slowed growth to an average of approximately 5 percent between 2014 and 2017
+
+
+```{r fig.width = 8, fig.height = 4, echo = FALSE}
+plot(gdp_growth)
+```
+
+##### GDP Composition
+* GDP is driven by services, comprising around 55% of GDP
+* With the production of crude oil, industry has gradually expanded
+
+```{r fig.width = 6, fig.height = 4, fig.asp = 0.5, echo = FALSE}
+plot(gdp_shares)
+```
+
+
+##### Poverty in Ghana  
+* Economic growth between 2012/13 and 2016/17 has __not been pro-poor__.  
+* The middle class benefitted from growth, while those at the bottom end of
+the distribution, especially the very poor, experienced a decline in consumption per adult
+equivalent over the four-year period
+* Poverty is largely a rural phenomenom
+* Even though poverty in the Upper West Region is the highest among the 10 regions,
+the region contributes less than 10 percent to national poverty because it is the
+smallest region in Ghana in terms of population.
+
+```{r fig.width=6, fig.height=8, fig.asp= 0.8, echo=FALSE}
+plot(pov_plot)
+```
+
+##### Inequality
+* Fundamental cause of rising poverty in the Volta and three Northern regions is lack of
+economic growth in these regions
+* Inequality is highest in the Upper West and Northern Regions
+* In the Northern Region and Upper East Region, poverty increased because both the growth and redistribution deteriorated  
+
+```{r fig.width=6, fig.height=8, fig.asp= 0.8, echo=FALSE}
+plot(gini_plot)
+```
+
+##### Human Development
+*Access to health services had declined over the years. The
+proportion of the ill or injured who are likely not to consult a doctor or even visit a health
+facility for treatment increased over the four-year period. 
+
+
+
+
+
+
+
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Cmd+Shift+Enter*. 
+
+```{r}
+plot(cars)
+```
+
+Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Cmd+Option+I*.
+
+When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Cmd+Shift+K* to preview the HTML file). 
+
+The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
+
