@@ -5,9 +5,8 @@
 
 
 # Load packages, prep folders and paths -----------------------------------
-pacman::p_load("tidyverse", "sf", "lubridate", "extrafont", "readxl", "purrr", "scales", "llamar", "haven",
-               "vtable", "data.table", "survey")
-
+pacman::p_load("tidyverse", "sf", "lubridate", "extrafont", "readxl", "purrr", "scales", "llamar", "haven", "vtable", "data.table", "survey")
+ 
 
 dir.create("Data")
 dir.create("Articles")
