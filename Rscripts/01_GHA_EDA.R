@@ -135,7 +135,7 @@ gdp_shares <- gha_df$`GDP Sectoral_Share` %>%
   mutate(label = if_else(Year == max(Year), as.character(Sector), NA_character_)) %>% 
   ggplot(aes(x = Year, y = Value, group = Sector, colour = Sector)) +
   geom_line(size = 1) +
-  scale_color_manual(values=c("#a6d854", "#e5c494", "#e78ac3")) +
+  scale_color_manual(values = c("#a6d854", "#e5c494", "#e78ac3")) +
   theme_line +
   scale_x_continuous(limits = c(2004, 2020)) +
   scale_y_continuous(limits = c(0, 0.75),
