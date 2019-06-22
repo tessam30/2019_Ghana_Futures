@@ -43,7 +43,7 @@ plot(pov_plot)
 * Fundamental cause of rising poverty in the Volta and three Northern regions is lack of
 economic growth in these regions
 * Inequality is highest in the Upper West and Northern Regions
-* In the Northern Region and Upper East Region, poverty increased because both the growth and redistribution deteriorated  
+* In the Northern Region and Upper East Region, poverty increased because both the growth and redistribution deteriorated
 
 ```{r fig.width=6, fig.height=8, fig.asp= 0.8, echo=FALSE}
 plot(gini_plot)
@@ -53,23 +53,14 @@ plot(gini_plot)
 *Access to health services had declined over the years. The
 proportion of the ill or injured who are likely not to consult a doctor or even visit a health
 facility for treatment increased over the four-year period. 
+* Electricity access has steadily increased in the 
 
 
-
-
-
-
-
-
-Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Cmd+Shift+Enter*. 
-
-```{r}
-plot(cars)
+```{r fig.width=6, fig.height=8, fig.asp= 0.8, echo=FALSE}
+plot(access_plot)
 ```
 
-Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Cmd+Option+I*.
 
-When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Cmd+Shift+K* to preview the HTML file). 
 
-The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
+
 

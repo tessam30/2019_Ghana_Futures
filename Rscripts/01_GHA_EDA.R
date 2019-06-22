@@ -166,7 +166,8 @@ gdp_growth <-   gha_df$`Gdp Growth` %>%
 
 # Access to services ------------------------------------------------------
 
-gha_df$Service_Access %>% 
+access_plot <- 
+  gha_df$Service_Access %>% 
     mutate(Region_sort = fct_reorder(Region, Value)) %>%
     mutate(label = if_else(Year == max(Year) & Region == "Upper East", as.character(Indicator), NA_character_)) %>% 
     ggplot(aes(x = Year, y = Value, group = Indicator, colour = Indicator)) +
@@ -179,7 +180,12 @@ gha_df$Service_Access %>%
     scale_y_continuous(limits = c(0, 1),
                        labels = scales::percent_format(accuracy = 1)) +
     geom_label_repel(aes(label = label),
-                     na.rm = TRUE, segment.size = 0) +
+                     na.rm = TRUE, 
+                     segment.size = 0,
+                     label.size = NA,
+                     nudge_y = 0.1,
+                     nudge_x = 10,
+                     box.padding = 0.80, point.padding = 0.5) +
     labs(x = "", y = "",
          title = "Regions in Northern Ghana continue to lag behind in terms of access to electricty and improved toilets",
          subtitle = "Electricity access has grown faster than improved toilet access",
