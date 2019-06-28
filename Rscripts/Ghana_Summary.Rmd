@@ -1,32 +1,41 @@
 ---
 title: "Ghana Scenario Planning Notes"
-output: html_notebook
+author: "Tim Essam, USAID GeoCenter"
+date: "July 6, 2019"
+output:
+  html_notebook: default
+
 ---
 
+---    
 
-### Poverty Profile Report 2005 - 2017 
-
-##### GDP Growth and Inflation
+#### GDP Growth and Inflation
 * Average annual growth was 6.8 percent  
 * In 2017, Ghana was one of the fastest growing economies in the world
 * Weaker fiscal and monetary policies, terms of trade shocks from lower oil prices, and electricity rationing slowed growth to an average of approximately 5 percent between 2014 and 2017
 
-
-```{r fig.width = 8, fig.height = 4, echo = FALSE}
+---  
+```{r GDP Growth, fig.width = 8, fig.height = 4, fig.asp = 0.4, echo = FALSE}
 plot(gdp_growth)
 ```
 
-##### GDP Composition
+---  
+
+#### GDP Composition Driven by Services
 * GDP is driven by services, comprising around 55% of GDP
 * With the production of crude oil, industry has gradually expanded
 
-```{r fig.width = 6, fig.height = 4, fig.asp = 0.5, echo = FALSE}
+---  
+
+```{r GDP Composition, fig.width = 6, fig.height = 4, fig.asp = 0.4, echo = FALSE}
 plot(gdp_shares)
 ```
 
 
-##### Poverty in Ghana  
-* Economic growth between 2012/13 and 2016/17 has __not been pro-poor__.  
+---  
+
+#### Poverty in Ghana is Greatest in the Upper West and North
+* Economic growth between 2012/13 and 2016/17 has __not been pro-poor__   
 * The middle class benefitted from growth, while those at the bottom end of
 the distribution, especially the very poor, experienced a decline in consumption per adult
 equivalent over the four-year period
@@ -35,32 +44,87 @@ equivalent over the four-year period
 the region contributes less than 10 percent to national poverty because it is the
 smallest region in Ghana in terms of population.
 
-```{r fig.width=6, fig.height=8, fig.asp= 0.8, echo=FALSE}
+---  
+
+```{r Poverty, fig.width=6, fig.height=8, fig.asp= 0.6, echo=FALSE}
 plot(pov_plot)
 ```
 
-##### Inequality
+---  
+
+#### Inequality has Increased in the North
 * Fundamental cause of rising poverty in the Volta and three Northern regions is lack of
 economic growth in these regions
 * Inequality is highest in the Upper West and Northern Regions
 * In the Northern Region and Upper East Region, poverty increased because both the growth and redistribution deteriorated
 
-```{r fig.width=6, fig.height=8, fig.asp= 0.8, echo=FALSE}
+---
+
+```{r Inequality, fig.width=6, fig.height=8, fig.asp= 0.6, echo=FALSE}
 plot(gini_plot)
 ```
 
-##### Human Development
-*Access to health services had declined over the years. The
-proportion of the ill or injured who are likely not to consult a doctor or even visit a health
-facility for treatment increased over the four-year period. 
-* Electricity access has steadily increased in the 
+
+---  
+
+#### Human Development lags behind in the North  
+* Access to health services had declined over the years. The proportion of the ill or injured who are likely not to consult a doctor or even visit a health facility for treatment increased over the four-year period.   
+* Electricity access has steadily increased in the north but still lags behind  
+* Access to improved toilets are rare in Upper East and Upper West  
 
 
-```{r fig.width=6, fig.height=8, fig.asp= 0.8, echo=FALSE}
+---  
+
+```{r Infrastructure, fig.width=6, fig.height=8, fig.asp= 0.75, echo=FALSE}
 plot(access_plot)
 ```
 
+---  
 
+#### Fertility Indicators lag behind in the North
+* Adolescent birth rates are highest in Volta and Western Region
+* Demand for family planning and contraception use is lowest in Northern Region. As a result, total fertility rate is highest in this region.
+* Upper East Region has high demand for family planning and modern contraception use.
 
+---  
+
+```{r Fertility, fig.width=6, fig.height=8, fig.asp= 0.6, echo=FALSE}
+plot(fertility_plot)
+```
+
+---  
+
+#### Delcining Chronic Child Malnutrition throughout Ghana  
+* Stunting has decline in recent years, but remains high in Northern Region 
+* Ghana has some of the lowest stunting rates in West Africa  
+
+---  
+
+```{r Stunting, echo=FALSE, fig.asp=0.6, fig.height=8, fig.width=6}
+plot(stunting_plot)
+```
+---  
+
+#### Males Use more Information Communication Technology than Females
+* Greater Accra Region has the most cell phone use  
+* The gap between male and female use is greatest in Upper West Region  
+* The North lags behind in use overall  
+
+---  
+```{r Mobile use, echo=FALSE, fig.asp=0.5, fig.height=8, fig.width=6}
+plot(mobile_plot)
+```
+
+--- 
+
+* Great Accra leads in terms of ICT usage, wherease the North lags far behind
+* Overall usage is Greater Accra exceeds the average for all of Africa (~ 11%)
+* Women in every part of Ghana have lower usage rates  
+
+---  
+
+```{r ICT use, fig.width=6, fig.height=8, fig.asp= 0.5, echo=FALSE}
+plot(ict_plot)
+```
 
 

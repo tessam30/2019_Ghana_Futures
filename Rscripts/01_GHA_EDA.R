@@ -17,7 +17,19 @@ y_axix_pct <- list( scale_y_continuous(
 ))
 
 # Change names to read as character vector not factor for mergabliity later on
-gha_sf1 <- st_read(file.path(gispath, "GHA_adm1.shp"), stringsAsFactors = FALSE)
+gha_sf1_new <- st_read(file.path(datapath, "Admin1", "Admin1.shp"), stringsAsFactors = FALSE)
+
+# Create old Regions to make maps with; Plot below to check how they look
+gha_sf1 <- 
+  st_read(file.path(datapath, "Admin2", "Admin2.shp"), stringsAsFactors = FALSE) %>% 
+  group_by(RGN_NM2012) %>% 
+  summarise() %>% 
+  st_simplify(dTolerance = 20) %>% 
+  rename(Region = RGN_NM2012)
+ 
+gha_sf1 %>% 
+  ggplot() + 
+  geom_sf(aes(fill = Region, colour = Region))
 
 excel_sheets(file.path(datapath, "2019_Ghana_Indicators.xlsx"))
 
@@ -29,21 +41,24 @@ gha_df <-
   map(read_excel, path = ghana_data_path)
 glimpse(gha_df)
 
-setdiff(gha_sf1$NAME_1, gha_df$Stunting$Region)
-
 gha_df$Stunting <- 
   gha_df$Stunting %>% 
-  mutate(NAME_1 = str_squish(Region))
+  mutate(Region = str_squish(Region))
+
+# Checking for differences in the names as this will be the merge feature
+setdiff(gha_sf1$Region, gha_df$Stunting$Region)
 
 stunting_ntl_ave <- 
   gha_df$Stunting %>% 
-  filter(NAME_1 == "National")
+  filter(Region == "National")
 
+# Stunting ----------------------------------------------------------------
 
-gha_df$Stunting %>% 
+stunting_plot <- 
+  gha_df$Stunting %>% 
   mutate(Region_sort = fct_reorder(Region, Value, .desc = TRUE),
          text = ifelse(NAME_1 == "Northern" & Year == 1998, "national average", "")) %>% 
-  filter(NAME_1 != "National") %>% 
+  filter(Region != "National") %>% 
   ggplot(aes(x = Year, y = Value)) +
   geom_area(data = stunting_ntl_ave, aes(x = Year, y = Value), 
             fill = grey10K, size = 1, alpha = 0.85) +
@@ -58,11 +73,25 @@ gha_df$Stunting %>%
     # breaks = seq(0, 1, by = 0.25)
   ) +
   scale_fill_viridis_c(option = "A", direction = -1) +
-
-  labs(title = "Northern Region has the highest levels of stunting",
+labs(title = "Northern Region has the highest levels of stunting",
        subtitle = subtitle,
        x = "", y = "",
-       caption = "Data from DHS & MICS surveys")
+       caption = "Source: DHS & MICS surveys")
+  
+stunting_map <- 
+  gha_sf1 %>% 
+  left_join(gha_df$Stunting, by = c("Region")) %>% 
+  ggplot() + 
+  geom_sf(aes(fill = Value), colour = "white", size = 0.0) + 
+  facet_wrap(~Year, nrow = 2) +
+  scale_fill_viridis_c(option = "A", direction = -1,
+                       labels = scales::percent_format(accuracy = 1)) +
+  theme_minimal() +
+  theme(legend.position = "top") +
+  labs(title = "Northern Region has the highest levels of stunting",
+       subtitle = "Regions based on pre-2018 polygons",
+       caption = "Source: DHS & MICS surveys",
+       labels = "Stunting rate")
   
   
 
@@ -90,7 +119,23 @@ pov_plot <- gha_df$Poverty_region %>%
   scale_fill_viridis_c(option = "C", direction = -1) +
   theme_line +
   labs(title = "Upper West region has the highest poverty levels",
-       subtitle = subtitle)
+       subtitle = subtitle,
+       x = "", y = "")
+
+pov_map <- 
+  gha_sf1 %>%
+  left_join(gha_df$Poverty_region, by = c("Region")) %>% 
+  filter(Indicator == "Poverty incidence") %>% 
+  ggplot() +
+  geom_sf(aes(fill = Value), colour = "white", size = 0.1) + facet_wrap(~Year) +
+  scale_fill_viridis_c(option = "C", direction = -1) +
+  labs(title = "Upper West region has the highest poverty levels",
+       subtitle = subtitle,
+       x = "", y = "",
+       fill = "Poverty rate") + 
+  theme_minimal()
+
+
 
 gini_plot <- 
   gha_df$Poverty_region %>% 
@@ -113,9 +158,9 @@ gini_plot <-
 
 # Family Planning ---------------------------------------------------------
 
-gha_df$Fertility_Region %>% 
+fertility_plot <- gha_df$Fertility_Region %>% 
   mutate(Region_sort = fct_reorder(Region, `adolescent birth rate`),
-         reg_color = ifelse(Region == "National", grey40K, grey20K)) %>% 
+         reg_color = ifelse(Region == "National", '#80cdc1', grey30K)) %>% 
   gather("indicator", "value", `adolescent birth rate`:`demand for family planning`) %>% 
   mutate(indicator_sort = fct_reorder(indicator, value, .desc = TRUE)) %>% 
   ggplot(aes(y = value, x = Region_sort, fill = reg_color)) +
@@ -134,7 +179,7 @@ gha_df$Fertility_Region %>%
 gdp_shares <- gha_df$`GDP Sectoral_Share` %>% 
   mutate(label = if_else(Year == max(Year), as.character(Sector), NA_character_)) %>% 
   ggplot(aes(x = Year, y = Value, group = Sector, colour = Sector)) +
-  geom_line(size = 1) +
+  geom_line(size = 1.25) + geom_point(size = 2) +
   scale_color_manual(values = c("#a6d854", "#e5c494", "#e78ac3")) +
   theme_line +
   scale_x_continuous(limits = c(2004, 2020)) +
@@ -148,9 +193,10 @@ gdp_shares <- gha_df$`GDP Sectoral_Share` %>%
        subtitle = "While the overall share is shrining, agriculture has surged in recent years",
        caption = "Source: Ghana Statistical Service")
 
-gdp_growth <-   gha_df$`Gdp Growth` %>% 
+gdp_growth <- 
+  gha_df$`Gdp Growth` %>% 
     ggplot(aes(x = Year, y = Value, group = Indicator)) +
-    geom_line(colour = grey40K, size = 0.5) + 
+    geom_line(colour = grey40K, size = 1) + 
     geom_point(aes(y = Value, fill = Value), size = 4, colour = grey80K, shape = 21) +
     facet_wrap(~Indicator) +
     theme_line + 
@@ -195,14 +241,14 @@ access_plot <-
 
 # ICT Use -----------------------------------------------------------------
 gha_df$`ICT USe` %>% 
-    mutate(Region_sort = fct_reorder(Region, `mobile use`)) %>% 
-    gather(indicator, value, `Computer use`:`ICT activity`) %>%  
+  mutate(Region_sort = fct_reorder(Region, `Mobile use`)) %>% 
+    gather(indicator, value, `Computer use`:`One ICT activity`) %>%  
     mutate(indicator_sort = fct_reorder(indicator, value, .desc = TRUE)) %>% 
     ggplot(aes(x = Region_sort, y = indicator_sort)) +
-    geom_tile(aes(fill = value), color = grey90K) +
+    geom_tile(aes(fill = value), color = grey10K) +
     geom_text(aes(label = percent(value)), colour = "black") +
     scale_fill_viridis_c(
-      direction = -1, alpha = .80,
+      direction = -1, alpha = 1,
       option = "D", label = percent_format(accuracy = 2), 
     ) + # format labels in legend
     theme_minimal() +
@@ -213,10 +259,11 @@ gha_df$`ICT USe` %>%
 # Dumbell plot may be better here
   library(ggalt)  
 
-  gha_df$`ICT USe` %>% 
+  mobile_plot <- 
+    gha_df$`ICT USe` %>% 
     gather(indicator, value, `Computer use`:`One ICT activity`) %>%  
     mutate(indicator_sort = fct_reorder(indicator, value, .desc = TRUE)) %>% 
-    spread(Sex, value) %>% 
+    spread(Sex, value)  %>% 
     filter(indicator == "Mobile use") %>% 
     mutate(Region_sort = fct_reorder(Region, male),
            diff = male - female) %>% 
@@ -232,13 +279,14 @@ gha_df$`ICT USe` %>%
                        labels = scales::percent_format(accuracy = 1)) +
     labs(x = "", 
          y = "", 
-         title = "Men use mobile phones more than women",
-         subtitle = "Upper West Region lags behind in terms of women's use",
+         title = "Men (green) use mobile phones more than women",
+         subtitle = "Upper West Region lags behind in terms of women's use (orange = women, green = men)",
          caption = "Source: 2017 Multiple Indicator Cluster Survey (MICS)")
   
     
     
-    gha_df$`ICT USe` %>% 
+    ict_plot <- 
+      gha_df$`ICT USe` %>% 
     gather(indicator, value, `Computer use`:`One ICT activity`) %>%  
     mutate(indicator_sort = fct_reorder(indicator, value, .desc = TRUE)) %>% 
     spread(Sex, value) %>% 
@@ -256,13 +304,14 @@ gha_df$`ICT USe` %>%
                        labels = scales::percent_format(accuracy = 1)) +
     labs(x = "", 
          y = "", 
-         title = "Men use  information communication technology more than women",
-         subtitle = "The gap is greatest in areas with the heaviest use",
+         title = "Men (green) use information communication technology more than women",
+         subtitle = "The gap is greatest in areas with the heaviest use (orange = women, green = men)",
          caption = "Source: 2017 Multiple Indicator Cluster Survey (MICS)")
 
 
-# New section -------------------------------------------------------------
+# Maps -------------------------------------------------------------
 
-        
+colour_count <- n
+mycolours <- colorRampPalette(brewer.pal(10, "Set2"))(colour_count)
   
                              
