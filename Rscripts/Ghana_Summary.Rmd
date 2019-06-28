@@ -92,17 +92,7 @@ plot(access_plot)
 plot(fertility_plot)
 ```
 
----  
 
-#### Delcining Chronic Child Malnutrition throughout Ghana  
-* Stunting has decline in recent years, but remains high in Northern Region 
-* Ghana has some of the lowest stunting rates in West Africa  
-
----  
-
-```{r Stunting, echo=FALSE, fig.asp=0.6, fig.height=8, fig.width=6}
-plot(stunting_plot)
-```
 ---  
 
 #### Males Use more Information Communication Technology than Females
@@ -127,4 +117,16 @@ plot(mobile_plot)
 plot(ict_plot)
 ```
 
+---  
 
+#### Delcining Chronic Child Malnutrition throughout Ghana  
+* Stunting has decline in recent years, but remains high in Northern Region 
+* Ghana has some of the lowest stunting rates in West Africa  
+
+---  
+```{r Chronic Malnutrition, echo=FALSE, fig.asp=0.3, fig.height=8, fig.width=6}
+plot(stunting_map)
+```
+```{r Chronic Malnutrition Line, echo=FALSE, fig.asp=0.6, fig.height=8, fig.width=6}
+plot(stunting_plot)
+```

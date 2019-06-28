@@ -83,7 +83,7 @@ stunting_map <-
   left_join(gha_df$Stunting, by = c("Region")) %>% 
   ggplot() + 
   geom_sf(aes(fill = Value), colour = "white", size = 0.0) + 
-  facet_wrap(~Year, nrow = 2) +
+  facet_wrap(~Year, nrow = 1) +
   scale_fill_viridis_c(option = "A", direction = -1,
                        labels = scales::percent_format(accuracy = 1)) +
   theme_minimal() +
