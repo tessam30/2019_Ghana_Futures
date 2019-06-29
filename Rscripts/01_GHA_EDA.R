@@ -43,7 +43,8 @@ glimpse(gha_df)
 
 gha_df$Stunting <- 
   gha_df$Stunting %>% 
-  mutate(Region = str_squish(Region))
+  mutate(Region = str_squish(Region),
+         map_label = ifelse(Year == 1993, Region, NA))
 
 # Checking for differences in the names as this will be the merge feature
 setdiff(gha_sf1$Region, gha_df$Stunting$Region)
@@ -81,13 +82,27 @@ labs(title = "Northern Region has the highest levels of stunting",
 stunting_map <- 
   gha_sf1 %>% 
   left_join(gha_df$Stunting, by = c("Region")) %>% 
+  filter(Region != "National") %>% 
+  mutate(lon = map_dbl(geometry, ~st_centroid(.x)[[1]]),
+         lat = map_dbl(geometry, ~st_centroid(.x)[[2]])) %>% 
   ggplot() + 
   geom_sf(aes(fill = Value), colour = "white", size = 0.0) + 
-  facet_wrap(~Year, nrow = 1) +
+  geom_text(aes(
+    label = map_label,
+    x = lon,
+    y = lat
+  ),
+  color = "#ffffff",
+  size = 4) +
+  facet_wrap(~Year, nrow = 2) +
   scale_fill_viridis_c(option = "A", direction = -1,
                        labels = scales::percent_format(accuracy = 1)) +
   theme_minimal() +
-  theme(legend.position = "top") +
+  theme(legend.position = "top",
+        strip.text.x = element_text(hjust = 0),
+        panel.background = element_rect(fill = grey20K,
+        colour = "#ffffff",
+        size = 0, linetype = "solid")) +
   labs(title = "Northern Region has the highest levels of stunting",
        subtitle = "Regions based on pre-2018 polygons",
        caption = "Source: DHS & MICS surveys",

@@ -124,7 +124,7 @@ plot(ict_plot)
 * Ghana has some of the lowest stunting rates in West Africa  
 
 ---  
-```{r Chronic Malnutrition, echo=FALSE, fig.asp=0.3, fig.height=8, fig.width=6}
+```{r Chronic Malnutrition, echo=FALSE, fig.width=6, fig.height = 8, fig.asp = 0.8}
 plot(stunting_map)
 ```
 ```{r Chronic Malnutrition Line, echo=FALSE, fig.asp=0.6, fig.height=8, fig.width=6}
