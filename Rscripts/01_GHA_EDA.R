@@ -4,6 +4,7 @@
 # 
 
 library(ggrepel)
+library(RColorBrewer)
 # Load data and investigate -----------------------------------------------
 
 theme_line <- theme_xygrid(projector = TRUE) +
@@ -58,7 +59,7 @@ stunting_ntl_ave <-
 stunting_plot <- 
   gha_df$Stunting %>% 
   mutate(Region_sort = fct_reorder(Region, Value, .desc = TRUE),
-         text = ifelse(NAME_1 == "Northern" & Year == 1998, "national average", "")) %>% 
+         text = ifelse(Region == "Northern" & Year == 1998, "national average", "")) %>% 
   filter(Region != "National") %>% 
   ggplot(aes(x = Year, y = Value)) +
   geom_area(data = stunting_ntl_ave, aes(x = Year, y = Value), 
@@ -326,7 +327,49 @@ gha_df$`ICT USe` %>%
 
 # Maps -------------------------------------------------------------
 
-colour_count <- n
-mycolours <- colorRampPalette(brewer.pal(10, "Set2"))(colour_count)
+# Compare boundaries to show differences and introduce the repurcussions for new statistics
+    colour_count <- length(unique(gha_sf1$Region))
+    mycolours <- colorRampPalette(RColorBrewer::brewer.pal(9, "Spectral"))(colour_count)    
+    
+    gha_map_old <- 
+    gha_sf1 %>% 
+      mutate(lon = map_dbl(geometry, ~st_centroid(.x)[[1]]),
+             lat = map_dbl(geometry, ~st_centroid(.x)[[2]])) %>% 
+      ggplot() + 
+      geom_sf(aes(fill = Region), colour = grey60K, size = 0.1) + 
+      geom_text(aes(
+        label = Region,
+        x = lon,
+        y = lat
+      )) +
+      scale_fill_manual(values = mycolours) +
+      theme(legend.position = "none") +
+      labs(title = "Ghana Regional Boundaries pre-2018")
+    
+    colour_count_new <- length(unique(gha_sf1_new$REGION)) 
+    mycolours_new <- colorRampPalette(RColorBrewer::brewer.pal(9, "Spectral"))(colour_count_new) 
+    
+    gha_map_new <- 
+    gha_sf1_new %>% 
+      mutate(lon = map_dbl(geometry, ~st_centroid(.x)[[1]]),
+             lat = map_dbl(geometry, ~st_centroid(.x)[[2]]),
+             REGION = str_to_title(REGION)) %>% 
+      ggplot() + 
+      geom_sf(aes(fill = REGION), colour = grey60K, size = 0.1) + 
+      geom_text(aes(
+        label = REGION,
+        x = lon,
+        y = lat
+      )) +
+      scale_fill_manual(values = mycolours_new) +
+      theme(legend.position = "none") +
+      labs(title = "Ghana Regional Boundaries as of 2018")
+    
+    
+gha_compare <- ggpubr::ggarrange(gha_map_old, gha_map_new, 
+                                nrow = 1, align = "h") %>% 
+  annotate_figure(., top = text_grob("Ghana gained six new geographic regions in 2018", 
+                                     size = 16, hjust = 1))  
   
+
                              

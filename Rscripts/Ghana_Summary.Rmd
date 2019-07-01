@@ -4,7 +4,6 @@ author: "Tim Essam, USAID GeoCenter"
 date: "July 6, 2019"
 output:
   html_notebook: default
-
 ---
 
 ---    
@@ -17,6 +16,7 @@ output:
 ---  
 ```{r GDP Growth, fig.width = 8, fig.height = 4, fig.asp = 0.4, echo = FALSE}
 plot(gdp_growth)
+
 ```
 
 ---  
@@ -130,3 +130,15 @@ plot(stunting_map)
 ```{r Chronic Malnutrition Line, echo=FALSE, fig.asp=0.6, fig.height=8, fig.width=6}
 plot(stunting_plot)
 ```
+
+#### As of 2018, Ghana now has 16 Administrative Regions
+* Statistics reported above are from surveys based on 10 administrative regions
+* New surveys will likely be powered to be respresentative for each of the 16 regions
+* This finer geographic detail will help further highlight geographic differences in development outcomes
+
+---  
+
+```{r Boundary Comparison, echo=FALSE, fig.width=6, fig.height = 8, fig.asp = 0.8}
+plot(gha_compare)
+```
+
