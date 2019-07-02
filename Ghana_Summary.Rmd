@@ -1,5 +1,5 @@
 ---
-title: "Ghana Scenario Planning Notes"
+title: "DRAFT: Ghana Scenario Planning Notes"
 knit: (function(input_file, encoding) {
   out_dir <- 'Docs';
   rmarkdown::render(input_file,
