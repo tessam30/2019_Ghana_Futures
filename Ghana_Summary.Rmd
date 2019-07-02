@@ -1,5 +1,10 @@
 ---
 title: "Ghana Scenario Planning Notes"
+knit: (function(input_file, encoding) {
+  out_dir <- 'Docs';
+  rmarkdown::render(input_file,
+ encoding=encoding,
+ output_file=file.path(dirname(input_file), out_dir, 'index.html'))})
 author: "Tim Essam, USAID GeoCenter"
 date: "7/2/2019"
 output: html_document
@@ -396,6 +401,7 @@ gha_compare <- ggpubr::ggarrange(gha_map_old, gha_map_new,
 * Weaker fiscal and monetary policies, terms of trade shocks from lower oil prices, and electricity rationing slowed growth to an average of approximately 5 percent between 2014 and 2017
 
 ---  
+
 ```{r GDP Growth, fig.width = 8, fig.height = 4, fig.asp = 0.4, echo = FALSE}
 plot(gdp_growth)
 
@@ -483,6 +489,7 @@ plot(fertility_plot)
 * The North lags behind in use overall  
 
 ---  
+
 ```{r Mobile use, echo=FALSE, fig.asp=0.5, fig.height=8, fig.width=6}
 plot(mobile_plot)
 ```
@@ -506,7 +513,8 @@ plot(ict_plot)
 * Ghana has some of the lowest stunting rates in West Africa  
 
 ---  
-```{r Chronic Malnutrition, echo=FALSE, fig.width=6, fig.height = 8, fig.asp = 0.8}
+
+```{r Chronic Malnutrition, echo=FALSE, fig.width=6, fig.height = 8, fig.asp = 0.8, warning = FALSE}
 plot(stunting_map)
 ```
 ```{r Chronic Malnutrition Line, echo=FALSE, fig.asp=0.6, fig.height=8, fig.width=6}
