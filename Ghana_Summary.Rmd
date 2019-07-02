@@ -207,7 +207,7 @@ fertility_plot <- gha_df$Fertility_Region %>%
   labs(title = "Family planning and birth rates by region",
        subtitle = "Note free scales to accomodate indicator ranges",
        x = "", y = "",
-       caption = "2018 Multiple Indicator Cluster Survey (MICS)")
+       caption = "Source: 2017 Multiple Indicator Cluster Survey (MICS)")
 
 
 # GDP Sectoral Composition  --------------------------------------------------------------------
@@ -384,7 +384,7 @@ gha_df$`ICT USe` %>%
       )) +
       scale_fill_manual(values = mycolours_new) +
       theme(legend.position = "none") +
-      labs(title = "Ghana Regional Boundaries as of 2018")
+      labs(title = "Current Ghana Regional Boundaries")
     
     
 gha_compare <- ggpubr::ggarrange(gha_map_old, gha_map_new, 
@@ -436,7 +436,7 @@ plot(gdp_shares)
 
 ---  
 
-#### Poverty in Ghana is Greatest in the Upper West and North
+#### Poverty in Ghana is Greatest in the Upper West and Northern Regions
 * Economic growth between 2012/13 and 2016/17 has __not been pro-poor__   
 * The middle class benefitted from growth, while those at the bottom end of
 the distribution, especially the very poor, experienced a decline in consumption per adult
@@ -455,10 +455,10 @@ plot(pov_plot)
 ---  
 
 #### Inequality has Increased in the North
-* Fundamental cause of rising poverty in the Volta and three Northern regions is lack of
+* Fundamental cause of rising poverty in Volta and three Northern regions is the lack of
 economic growth 
 * Inequality is highest in the Upper West and Northern Regions
-* In the Northern Region and Upper East Region, poverty increased because both the growth and redistribution deteriorated
+* In the Northern and Upper East Region, poverty increased because both the growth and redistribution deteriorated
 
 ---
 
@@ -472,7 +472,7 @@ plot(gini_plot)
 #### Human Development lags behind in the North  
 * Access to health services had declined over the years. The proportion of the ill or injured who are likely not to consult a doctor or even visit a health facility for treatment increased over the four-year period.   
 * Electricity access has steadily increased in the north but still lags behind  
-* Access to improved toilets are rare in Upper East and Upper West  
+* Access to improved toilets are rare in Upper East and Upper West Regions 
 
 
 ---  
