@@ -402,7 +402,7 @@ gha_compare <- ggpubr::ggarrange(gha_map_old, gha_map_new,
 
 ---  
 
-```{r GDP Growth, fig.width = 8, fig.height = 4, fig.asp = 0.4, echo = FALSE}
+```{r GDP Growth, fig.width = 8, fig.height = 4, echo = FALSE}
 plot(gdp_growth)
 
 ```
@@ -415,7 +415,7 @@ plot(gdp_growth)
 
 ---  
 
-```{r GDP Composition, fig.width = 6, fig.height = 4, fig.asp = 0.8, echo = FALSE}
+```{r GDP Composition, fig.width = 8, fig.height = 4, echo = FALSE}
 plot(gdp_shares)
 ```
 
@@ -434,7 +434,7 @@ smallest region in Ghana in terms of population.
 
 ---  
 
-```{r Poverty, fig.width=6, fig.height=8, fig.asp= 1, echo=FALSE}
+```{r Poverty, fig.width=7, fig.height=5, echo=FALSE}
 plot(pov_plot)
 ```
 
@@ -448,7 +448,7 @@ economic growth in these regions
 
 ---
 
-```{r Inequality, fig.width=6, fig.height=8, fig.asp= 1, echo=FALSE}
+```{r Inequality, fig.width=8, fig.height=6, , echo=FALSE}
 plot(gini_plot)
 ```
 
@@ -463,7 +463,7 @@ plot(gini_plot)
 
 ---  
 
-```{r Infrastructure, fig.width=6, fig.height=8, fig.asp= 1, echo=FALSE}
+```{r Infrastructure, fig.width=8, fig.height=6, fig.asp= 1, echo=FALSE}
 plot(access_plot)
 ```
 
@@ -476,7 +476,7 @@ plot(access_plot)
 
 ---  
 
-```{r Fertility, fig.width=6, fig.height=8, fig.asp= 1, echo=FALSE}
+```{r Fertility, fig.width=8, fig.height=6, fig.asp= 1, echo=FALSE}
 plot(fertility_plot)
 ```
 
@@ -490,7 +490,7 @@ plot(fertility_plot)
 
 ---  
 
-```{r Mobile use, echo=FALSE, fig.asp=1, fig.height=8, fig.width=6}
+```{r Mobile use, echo=FALSE, fig.asp=1, fig.height=6, fig.width=8}
 plot(mobile_plot)
 ```
 
@@ -502,7 +502,7 @@ plot(mobile_plot)
 
 ---  
 
-```{r ICT use, fig.width=6, fig.height=8, fig.asp= 1, echo=FALSE}
+```{r ICT use, fig.width=8, fig.height=6, fig.asp= 1, echo=FALSE}
 plot(ict_plot)
 ```
 
@@ -514,10 +514,10 @@ plot(ict_plot)
 
 ---  
 
-```{r Chronic Malnutrition, echo=FALSE, fig.width=6, fig.height = 8, fig.asp = 1, warning = FALSE}
+```{r Chronic Malnutrition, echo=FALSE, fig.width=8, fig.height = 6, fig.asp = 1, warning = FALSE}
 plot(stunting_map)
 ```
-```{r Chronic Malnutrition Line, echo=FALSE, fig.asp = 1, fig.height=8, fig.width=6}
+```{r Chronic Malnutrition Line, echo=FALSE, fig.asp = 1, fig.height=6, fig.width=8}
 plot(stunting_plot)
 ```
 
@@ -528,7 +528,7 @@ plot(stunting_plot)
 
 ---  
 
-```{r Boundary Comparison, echo=FALSE, fig.width=6, fig.height = 8, fig.asp = 1}
+```{r Boundary Comparison, echo=FALSE, fig.width=8, fig.height = 6, fig.asp = 1}
 plot(gha_compare)
 ```
 
