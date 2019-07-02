@@ -2,11 +2,13 @@
 title: "Ghana Scenario Planning Notes"
 author: "Tim Essam, USAID GeoCenter"
 date: "July 6, 2019"
-output:
-  html_notebook: default
+output: html_notebook
+#output: github_document
 ---
 
----    
+---
+
+--- 
 
 #### GDP Growth and Inflation
 * Average annual growth was 6.8 percent  

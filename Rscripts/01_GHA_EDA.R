@@ -5,6 +5,9 @@
 
 library(ggrepel)
 library(RColorBrewer)
+library(tidytext)
+library(rmarkdown)
+
 # Load data and investigate -----------------------------------------------
 
 theme_line <- theme_xygrid(projector = TRUE) +
@@ -55,7 +58,7 @@ stunting_ntl_ave <-
   filter(Region == "National")
 
 # Stunting ----------------------------------------------------------------
-
+## @knitr stunting
 stunting_plot <- 
   gha_df$Stunting %>% 
   mutate(Region_sort = fct_reorder(Region, Value, .desc = TRUE),
@@ -122,6 +125,7 @@ gha_df$Population %>%
 
 
 # Poverty by region -------------------------------------------------------
+## @knitr poverty
 
 pov_plot <- gha_df$Poverty_region %>% 
   filter(Indicator == "Poverty incidence") %>% 
@@ -174,14 +178,18 @@ gini_plot <-
 
 # Family Planning ---------------------------------------------------------
 
+## @knitr syntax
+
 fertility_plot <- gha_df$Fertility_Region %>% 
   mutate(Region_sort = fct_reorder(Region, `adolescent birth rate`),
          reg_color = ifelse(Region == "National", '#80cdc1', grey30K)) %>% 
   gather("indicator", "value", `adolescent birth rate`:`demand for family planning`) %>% 
-  mutate(indicator_sort = fct_reorder(indicator, value, .desc = TRUE)) %>% 
-  ggplot(aes(y = value, x = Region_sort, fill = reg_color)) +
+  mutate(indicator_sort = fct_reorder(indicator, value, .desc = TRUE),
+         region_sort2 = reorder_within(Region, value, indicator)) %>% 
+  ggplot(aes(y = value, x = region_sort2, fill = reg_color)) +
   coord_flip() + geom_col() +
-  facet_wrap(~indicator_sort, scales = "free_x") +
+  scale_x_reordered() +
+  facet_wrap(~indicator_sort, scales = "free") +
   scale_fill_identity() +
   theme_line +
   y_axix_pct + 
@@ -192,6 +200,7 @@ fertility_plot <- gha_df$Fertility_Region %>%
 
 
 # GDP Sectoral Composition  --------------------------------------------------------------------
+## @knitr gdp_share
 gdp_shares <- gha_df$`GDP Sectoral_Share` %>% 
   mutate(label = if_else(Year == max(Year), as.character(Sector), NA_character_)) %>% 
   ggplot(aes(x = Year, y = Value, group = Sector, colour = Sector)) +
