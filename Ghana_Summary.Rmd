@@ -1,0 +1,526 @@
+---
+title: "Ghana Scenario Planning Notes"
+author: "Tim Essam, USAID GeoCenter"
+date: "7/2/2019"
+output: html_document
+---
+
+```{r setup and munge, include=FALSE, echo = FALSE, message = FALSE}
+source(here::here("Rscripts", "00_Setup.R"))
+
+# Load data and investigate -----------------------------------------------
+
+theme_line <- theme_xygrid(projector = TRUE) +
+  theme(legend.position = "none",
+        strip.text = element_text(hjust = 0, size = 12)) 
+  
+subtitle <- c("Points above grey area indicate levels above the national average")
+y_axix_pct <- list( scale_y_continuous(
+  labels = scales::percent_format(accuracy = 1)
+  # breaks = seq(0, 1, by = 0.25)
+))
+
+# Change names to read as character vector not factor for mergabliity later on
+gha_sf1_new <- st_read(file.path(datapath, "Admin1", "Admin1.shp"), stringsAsFactors = FALSE)
+
+# Create old Regions to make maps with; Plot below to check how they look
+gha_sf1 <- 
+  st_read(file.path(datapath, "Admin2", "Admin2.shp"), stringsAsFactors = FALSE) %>% 
+  group_by(RGN_NM2012) %>% 
+  summarise() %>% 
+  st_simplify(dTolerance = 20) %>% 
+  rename(Region = RGN_NM2012)
+ 
+gha_sf1 %>% 
+  ggplot() + 
+  geom_sf(aes(fill = Region, colour = Region))
+
+excel_sheets(file.path(datapath, "2019_Ghana_Indicators.xlsx"))
+
+ghana_data_path <- file.path(datapath, "2019_Ghana_Indicators.xlsx")
+
+gha_df <- 
+  excel_sheets(ghana_data_path) %>% 
+  set_names() %>% 
+  map(read_excel, path = ghana_data_path)
+glimpse(gha_df)
+
+gha_df$Stunting <- 
+  gha_df$Stunting %>% 
+  mutate(Region = str_squish(Region),
+         map_label = ifelse(Year == 1993, Region, NA))
+
+# Checking for differences in the names as this will be the merge feature
+setdiff(gha_sf1$Region, gha_df$Stunting$Region)
+
+stunting_ntl_ave <- 
+  gha_df$Stunting %>% 
+  filter(Region == "National")
+
+# Seems to be a conflict with purrr in one of the packages
+library(ggrepel)
+library(RColorBrewer)
+library(tidytext)
+library(ggpubr)
+
+# Stunting ----------------------------------------------------------------
+## @knitr stunting
+stunting_plot <- 
+  gha_df$Stunting %>% 
+  mutate(Region_sort = fct_reorder(Region, Value, .desc = TRUE),
+         text = ifelse(Region == "Northern" & Year == 1998, "national average", "")) %>% 
+  filter(Region != "National") %>% 
+  ggplot(aes(x = Year, y = Value)) +
+  geom_area(data = stunting_ntl_ave, aes(x = Year, y = Value), 
+            fill = grey10K, size = 1, alpha = 0.85) +
+  geom_line(colour = grey40K, size = 0.5) + 
+  geom_point(aes(fill = Value), size = 4, colour = grey80K, shape = 21) + 
+  #geom_text(aes(y = .25, label = text), vjust = 4, size = 4, colour = grey60K) +
+  theme_line +
+  facet_wrap(~Region_sort) + 
+  scale_x_continuous(breaks = seq(1990, 2020, by = 5)) +
+  scale_y_continuous(
+    labels = scales::percent_format(accuracy = 1)
+    # breaks = seq(0, 1, by = 0.25)
+  ) +
+  scale_fill_viridis_c(option = "A", direction = -1) +
+labs(title = "Northern Region has the highest levels of stunting",
+       subtitle = subtitle,
+       x = "", y = "",
+       caption = "Source: DHS & MICS surveys")
+  
+stunting_map <- 
+  gha_sf1 %>% 
+  left_join(gha_df$Stunting, by = c("Region")) %>% 
+  filter(Region != "National") %>% 
+  mutate(lon = map_dbl(geometry, ~st_centroid(.x)[[1]]),
+         lat = map_dbl(geometry, ~st_centroid(.x)[[2]])) %>% 
+  ggplot() + 
+  geom_sf(aes(fill = Value), colour = "white", size = 0.0) + 
+  geom_text(aes(
+    label = map_label,
+    x = lon,
+    y = lat
+  ),
+  color = "#ffffff",
+  size = 4) +
+  facet_wrap(~Year, nrow = 2) +
+  scale_fill_viridis_c(option = "A", direction = -1,
+                       labels = scales::percent_format(accuracy = 1)) +
+  theme_minimal() +
+  theme(legend.position = "top",
+        strip.text.x = element_text(hjust = 0),
+        panel.background = element_rect(fill = grey20K,
+        colour = "#ffffff",
+        size = 0, linetype = "solid")) +
+  labs(title = "Northern Region has the highest levels of stunting",
+       subtitle = "Regions based on pre-2018 polygons",
+       caption = "Source: DHS & MICS surveys",
+       labels = "Stunting rate")
+  
+  
+
+# Poverty Region  ------------------------------------------------------------
+gha_df$Population %>% print(n = Inf)
+gha_df$Population %>% 
+  filter(Regions != "Totals country") %>% 
+  ggplot(aes(x = year, colour = Regions)) +
+  geom_line(aes(y = Male)) +
+  geom_line(aes(y = Female)) 
+
+
+
+# Poverty by region -------------------------------------------------------
+## @knitr poverty
+
+pov_plot <- gha_df$Poverty_region %>% 
+  filter(Indicator == "Poverty incidence") %>% 
+  mutate(Region_sort = fct_reorder(Region, Value, .desc = TRUE)) %>%
+  ggplot(aes(x = Year, group = Region)) +
+  geom_area(aes(y = National_ave), fill = grey10K, size = 1, alpha = 0.85) +
+  geom_line(aes(y = Value), colour = grey40K, size = 0.5) + 
+  facet_wrap(~Region_sort) +
+  geom_point(aes(y = Value, fill = Value), size = 4, colour = grey80K, shape = 21) +
+  scale_x_continuous(limits = c(2005, 2020)) +
+  scale_fill_viridis_c(option = "C", direction = -1) +
+  theme_line +
+  labs(title = "Upper West region has the highest poverty levels",
+       subtitle = subtitle,
+       x = "", y = "")
+
+pov_map <- 
+  gha_sf1 %>%
+  left_join(gha_df$Poverty_region, by = c("Region")) %>% 
+  filter(Indicator == "Poverty incidence") %>% 
+  ggplot() +
+  geom_sf(aes(fill = Value), colour = "white", size = 0.1) + facet_wrap(~Year) +
+  scale_fill_viridis_c(option = "C", direction = -1) +
+  labs(title = "Upper West region has the highest poverty levels",
+       subtitle = subtitle,
+       x = "", y = "",
+       fill = "Poverty rate") + 
+  theme_minimal()
+
+
+
+gini_plot <- 
+  gha_df$Poverty_region %>% 
+  filter(Indicator == "Gini coefficient") %>% 
+  mutate(Region_sort = fct_reorder(Region, Value, .desc = TRUE)) %>%
+  ggplot(aes(x = Year, group = Region)) +
+  geom_area(aes(y = National_ave), fill = grey10K, size = 1, alpha = 0.85) +
+  geom_line(aes(y = Value), colour = grey40K, size = 0.5) + 
+  facet_wrap(~Region_sort) +
+  geom_point(aes(y = Value, fill = Value), size = 4, colour = grey80K, shape = 21) +
+  scale_x_continuous(limits = c(2005, 2020)) +
+  scale_fill_viridis_c(option = "C", direction = -1) +
+  theme_line +
+  labs(title = "Upper West region has the highest gini coefficient levels",
+       subtitle = str_c(subtitle, "\n", "A higher coefficient indicates more inequality"),
+                        x = "", 
+                        y = "",
+                        caption = "Source: 2017 Ghana Living Standards Survey")
+
+
+# Family Planning ---------------------------------------------------------
+
+## @knitr syntax
+
+fertility_plot <- gha_df$Fertility_Region %>% 
+  mutate(Region_sort = fct_reorder(Region, `adolescent birth rate`),
+         reg_color = ifelse(Region == "National", '#80cdc1', grey30K)) %>% 
+  gather("indicator", "value", `adolescent birth rate`:`demand for family planning`) %>% 
+  mutate(indicator_sort = fct_reorder(indicator, value, .desc = TRUE),
+         region_sort2 = reorder_within(Region, value, indicator)) %>% 
+  ggplot(aes(y = value, x = region_sort2, fill = reg_color)) +
+  coord_flip() + geom_col() +
+  scale_x_reordered() +
+  facet_wrap(~indicator_sort, scales = "free") +
+  scale_fill_identity() +
+  theme_line +
+  y_axix_pct + 
+  labs(title = "Family planning and birth rates by region",
+       subtitle = "Note free scales to accomodate indicator ranges",
+       x = "", y = "",
+       caption = "2018 Multiple Indicator Cluster Survey (MICS)")
+
+
+# GDP Sectoral Composition  --------------------------------------------------------------------
+## @knitr gdp_share
+gdp_shares <- gha_df$`GDP Sectoral_Share` %>% 
+  mutate(label = if_else(Year == max(Year), as.character(Sector), NA_character_)) %>% 
+  ggplot(aes(x = Year, y = Value, group = Sector, colour = Sector)) +
+  geom_line(size = 1.25) + geom_point(size = 2) +
+  scale_color_manual(values = c("#a6d854", "#e5c494", "#e78ac3")) +
+  theme_line +
+  scale_x_continuous(limits = c(2004, 2020)) +
+  scale_y_continuous(limits = c(0, 0.75),
+                     labels = scales::percent_format(accuracy = 1)) +
+  geom_label_repel(aes(label = label),
+                     nudge_x = 1,
+                     na.rm = TRUE, segment.size = 0) +
+  labs(x = "", y = "",
+       title = "Services constitute the largest share of overall gross domestic product",
+       subtitle = "While the overall share is shrining, agriculture has surged in recent years",
+       caption = "Source: Ghana Statistical Service")
+
+gdp_growth <- 
+  gha_df$`Gdp Growth` %>% 
+    ggplot(aes(x = Year, y = Value, group = Indicator)) +
+    geom_line(colour = grey40K, size = 1) + 
+    geom_point(aes(y = Value, fill = Value), size = 4, colour = grey80K, shape = 21) +
+    facet_wrap(~Indicator) +
+    theme_line + 
+    scale_x_continuous(limits = c(2004, 2020)) +
+    labs(x = "", y = "", 
+         title = "GDP growth has been strong in recent years, while inflation is near average",
+         subtitle = "High growth is associated with periods of low inflation") +
+    scale_fill_viridis_c(option = "D", direction = -1) +
+    scale_y_continuous(limits = c(0, 0.25),
+                       labels = scales::percent_format(accuracy = 1)) +
+    theme(strip.text = element_text(size = 20))
+    
+
+# Access to services ------------------------------------------------------
+
+access_plot <- 
+  gha_df$Service_Access %>% 
+    mutate(Region_sort = fct_reorder(Region, Value)) %>%
+    mutate(label = if_else(Year == max(Year) & Region == "Upper East", as.character(Indicator), NA_character_)) %>% 
+    ggplot(aes(x = Year, y = Value, group = Indicator, colour = Indicator)) +
+    geom_line(size = 1) + 
+    geom_point() +
+    facet_wrap(~Region_sort) +
+    theme_line +
+    scale_color_manual(values = c("#7570b3", "#1b9e77")) +
+    scale_x_continuous(limits = c(2004, 2020)) +
+    scale_y_continuous(limits = c(0, 1),
+                       labels = scales::percent_format(accuracy = 1)) +
+    geom_label_repel(aes(label = label),
+                     na.rm = TRUE, 
+                     segment.size = 0,
+                     label.size = NA,
+                     nudge_y = 0.1,
+                     nudge_x = 10,
+                     box.padding = 0.80, point.padding = 0.5) +
+    labs(x = "", y = "",
+         title = "Regions in Northern Ghana continue to lag behind in terms of access to electricty and improved toilets",
+         subtitle = "Electricity access has grown faster than improved toilet access",
+         caption = "Source: 2017 Ghana Living Standards Survey")
+    
+    
+
+# ICT Use -----------------------------------------------------------------
+gha_df$`ICT USe` %>% 
+  mutate(Region_sort = fct_reorder(Region, `Mobile use`)) %>% 
+    gather(indicator, value, `Computer use`:`One ICT activity`) %>%  
+    mutate(indicator_sort = fct_reorder(indicator, value, .desc = TRUE)) %>% 
+    ggplot(aes(x = Region_sort, y = indicator_sort)) +
+    geom_tile(aes(fill = value), color = grey10K) +
+    geom_text(aes(label = percent(value)), colour = "black") +
+    scale_fill_viridis_c(
+      direction = -1, alpha = 1,
+      option = "D", label = percent_format(accuracy = 2), 
+    ) + # format labels in legend
+    theme_minimal() +
+    #coord_fixed(ratio = 1.5) + # Fix the size of the squares
+    facet_wrap(~Sex, ncol = 2) + coord_flip() +
+    theme_line
+
+# Dumbell plot may be better here
+  library(ggalt)  
+
+  mobile_plot <- 
+    gha_df$`ICT USe` %>% 
+    gather(indicator, value, `Computer use`:`One ICT activity`) %>%  
+    mutate(indicator_sort = fct_reorder(indicator, value, .desc = TRUE)) %>% 
+    spread(Sex, value)  %>% 
+    filter(indicator == "Mobile use") %>% 
+    mutate(Region_sort = fct_reorder(Region, male),
+           diff = male - female) %>% 
+    ggplot(aes(x = female, xend = male, y = Region_sort)) +
+    geom_dumbbell( colour_x="#fc8d62", 
+                   colour_xend = "#a6d854", 
+                   color = grey40K,
+                   size = 2,
+                   size_x = 6,
+                   size_xend = 6) + facet_wrap(~indicator_sort) +
+    theme_line + theme_xygrid(projector = TRUE) +
+    scale_x_continuous(limits = c(0, 1),
+                       labels = scales::percent_format(accuracy = 1)) +
+    labs(x = "", 
+         y = "", 
+         title = "Men (green) use mobile phones more than women",
+         subtitle = "Upper West Region lags behind in terms of women's use (orange = women, green = men)",
+         caption = "Source: 2017 Multiple Indicator Cluster Survey (MICS)")
+  
+    
+    
+    ict_plot <- 
+      gha_df$`ICT USe` %>% 
+    gather(indicator, value, `Computer use`:`One ICT activity`) %>%  
+    mutate(indicator_sort = fct_reorder(indicator, value, .desc = TRUE)) %>% 
+    spread(Sex, value) %>% 
+    filter(indicator != "Mobile use") %>% 
+    mutate(Region_sort = fct_reorder(Region, male),
+           diff = male - female) %>% 
+    ggplot(aes(x = female, xend = male, y = Region_sort)) +
+    geom_dumbbell(colour_x="#fc8d62", size = 2,
+                   colour_xend = "#a6d854", 
+                   color = grey40K,
+                   size_x = 6,
+                   size_xend = 6) + facet_wrap(~indicator_sort) +
+    theme_line + theme_xygrid(projector = TRUE) + 
+    scale_x_continuous(limits = c(0, 1),
+                       labels = scales::percent_format(accuracy = 1)) +
+    labs(x = "", 
+         y = "", 
+         title = "Men (green) use information communication technology more than women",
+         subtitle = "The gap is greatest in areas with the heaviest use (orange = women, green = men)",
+         caption = "Source: 2017 Multiple Indicator Cluster Survey (MICS)")
+
+
+# Maps -------------------------------------------------------------
+
+# Compare boundaries to show differences and introduce the repurcussions for new statistics
+    colour_count <- length(unique(gha_sf1$Region))
+    mycolours <- colorRampPalette(RColorBrewer::brewer.pal(9, "Spectral"))(colour_count)    
+    
+    gha_map_old <- 
+    gha_sf1 %>% 
+      mutate(lon = map_dbl(geometry, ~st_centroid(.x)[[1]]),
+             lat = map_dbl(geometry, ~st_centroid(.x)[[2]])) %>% 
+      ggplot() + 
+      geom_sf(aes(fill = Region), colour = grey60K, size = 0.1) + 
+      geom_text(aes(
+        label = Region,
+        x = lon,
+        y = lat
+      )) +
+      scale_fill_manual(values = mycolours) +
+      theme(legend.position = "none") +
+      labs(title = "Ghana Regional Boundaries pre-2018")
+    
+    colour_count_new <- length(unique(gha_sf1_new$REGION)) 
+    mycolours_new <- colorRampPalette(RColorBrewer::brewer.pal(9, "Spectral"))(colour_count_new) 
+    
+    gha_map_new <- 
+    gha_sf1_new %>% 
+      mutate(lon = map_dbl(geometry, ~st_centroid(.x)[[1]]),
+             lat = map_dbl(geometry, ~st_centroid(.x)[[2]]),
+             REGION = str_to_title(REGION)) %>% 
+      ggplot() + 
+      geom_sf(aes(fill = REGION), colour = grey60K, size = 0.1) + 
+      geom_text(aes(
+        label = REGION,
+        x = lon,
+        y = lat
+      )) +
+      scale_fill_manual(values = mycolours_new) +
+      theme(legend.position = "none") +
+      labs(title = "Ghana Regional Boundaries as of 2018")
+    
+    
+gha_compare <- ggpubr::ggarrange(gha_map_old, gha_map_new, 
+                                nrow = 1, align = "h") %>% 
+  annotate_figure(., top = text_grob("Ghana gained six new geographic regions in 2018", 
+                                     size = 16, hjust = 1))  
+                             
+```
+
+--- 
+
+#### GDP Growth and Inflation
+* Average annual growth was 6.8 percent  
+* In 2017, Ghana was one of the fastest growing economies in the world
+* Weaker fiscal and monetary policies, terms of trade shocks from lower oil prices, and electricity rationing slowed growth to an average of approximately 5 percent between 2014 and 2017
+
+---  
+```{r GDP Growth, fig.width = 8, fig.height = 4, fig.asp = 0.4, echo = FALSE}
+plot(gdp_growth)
+
+```
+
+---  
+
+#### GDP Composition Driven by Services
+* GDP is driven by services, comprising around 55% of GDP
+* With the production of crude oil, industry has gradually expanded
+
+---  
+
+```{r GDP Composition, fig.width = 6, fig.height = 4, fig.asp = 0.4, echo = FALSE}
+plot(gdp_shares)
+```
+
+
+---  
+
+#### Poverty in Ghana is Greatest in the Upper West and North
+* Economic growth between 2012/13 and 2016/17 has __not been pro-poor__   
+* The middle class benefitted from growth, while those at the bottom end of
+the distribution, especially the very poor, experienced a decline in consumption per adult
+equivalent over the four-year period
+* Poverty is largely a rural phenomenom
+* Even though poverty in the Upper West Region is the highest among the 10 regions,
+the region contributes less than 10 percent to national poverty because it is the
+smallest region in Ghana in terms of population.
+
+---  
+
+```{r Poverty, fig.width=6, fig.height=8, fig.asp= 0.6, echo=FALSE}
+plot(pov_plot)
+```
+
+---  
+
+#### Inequality has Increased in the North
+* Fundamental cause of rising poverty in the Volta and three Northern regions is lack of
+economic growth in these regions
+* Inequality is highest in the Upper West and Northern Regions
+* In the Northern Region and Upper East Region, poverty increased because both the growth and redistribution deteriorated
+
+---
+
+```{r Inequality, fig.width=6, fig.height=8, fig.asp= 0.6, echo=FALSE}
+plot(gini_plot)
+```
+
+
+---  
+
+#### Human Development lags behind in the North  
+* Access to health services had declined over the years. The proportion of the ill or injured who are likely not to consult a doctor or even visit a health facility for treatment increased over the four-year period.   
+* Electricity access has steadily increased in the north but still lags behind  
+* Access to improved toilets are rare in Upper East and Upper West  
+
+
+---  
+
+```{r Infrastructure, fig.width=6, fig.height=8, fig.asp= 0.75, echo=FALSE}
+plot(access_plot)
+```
+
+---  
+
+#### Fertility Indicators lag behind in the North
+* Adolescent birth rates are highest in Volta and Western Region
+* Demand for family planning and contraception use is lowest in Northern Region. As a result, total fertility rate is highest in this region.
+* Upper East Region has high demand for family planning and modern contraception use.
+
+---  
+
+```{r Fertility, fig.width=6, fig.height=8, fig.asp= 0.6, echo=FALSE}
+plot(fertility_plot)
+```
+
+
+---  
+
+#### Males Use more Information Communication Technology than Females
+* Greater Accra Region has the most cell phone use  
+* The gap between male and female use is greatest in Upper West Region  
+* The North lags behind in use overall  
+
+---  
+```{r Mobile use, echo=FALSE, fig.asp=0.5, fig.height=8, fig.width=6}
+plot(mobile_plot)
+```
+
+--- 
+
+* Great Accra leads in terms of ICT usage, wherease the North lags far behind
+* Overall usage is Greater Accra exceeds the average for all of Africa (~ 11%)
+* Women in every part of Ghana have lower usage rates  
+
+---  
+
+```{r ICT use, fig.width=6, fig.height=8, fig.asp= 0.5, echo=FALSE}
+plot(ict_plot)
+```
+
+---  
+
+#### Delcining Chronic Child Malnutrition throughout Ghana  
+* Stunting has decline in recent years, but remains high in Northern Region 
+* Ghana has some of the lowest stunting rates in West Africa  
+
+---  
+```{r Chronic Malnutrition, echo=FALSE, fig.width=6, fig.height = 8, fig.asp = 0.8}
+plot(stunting_map)
+```
+```{r Chronic Malnutrition Line, echo=FALSE, fig.asp=0.6, fig.height=8, fig.width=6}
+plot(stunting_plot)
+```
+
+#### As of 2018, Ghana now has 16 Administrative Regions
+* Statistics reported above are from surveys based on 10 administrative regions
+* New surveys will likely be powered to be respresentative for each of the 16 regions
+* This finer geographic detail will help further highlight geographic differences in development outcomes
+
+---  
+
+```{r Boundary Comparison, echo=FALSE, fig.width=6, fig.height = 8, fig.asp = 0.8}
+plot(gha_compare)
+```
+
