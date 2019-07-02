@@ -88,6 +88,7 @@ stunting_plot <-
     labels = scales::percent_format(accuracy = 1)
     # breaks = seq(0, 1, by = 0.25)
   ) +
+  theme(panel.spacing = unit(1, "lines")) +
   scale_fill_viridis_c(option = "A", direction = -1) +
 labs(title = "Northern Region has the highest levels of stunting",
        subtitle = subtitle,
@@ -115,7 +116,7 @@ stunting_map <-
   theme_minimal() +
   theme(legend.position = "top",
         strip.text.x = element_text(hjust = 0),
-        panel.background = element_rect(fill = grey20K,
+        panel.background = element_rect(fill = grey10K,
         colour = "#ffffff",
         size = 0, linetype = "solid")) +
   labs(title = "Northern Region has the highest levels of stunting",
@@ -225,7 +226,7 @@ gdp_shares <- gha_df$`GDP Sectoral_Share` %>%
                      na.rm = TRUE, segment.size = 0) +
   labs(x = "", y = "",
        title = "Services constitute the largest share of overall gross domestic product",
-       subtitle = "While the overall share is shrining, agriculture has surged in recent years",
+       subtitle = "While the overall share is shrinking, agriculture has expanded in recent years",
        caption = "Source: Ghana Statistical Service")
 
 gdp_growth <- 
@@ -393,10 +394,23 @@ gha_compare <- ggpubr::ggarrange(gha_map_old, gha_map_new,
                              
 ```
 
+---  
+
+#### As of 2018, Ghana now has 16 Administrative Regions
+* Statistics reported below are from surveys based on 10 administrative regions
+* New surveys will likely be powered to be respresentative for each of the 16 regions
+* This finer geographic detail will help further highlight geographic differences in development outcomes
+
+---  
+
+```{r Boundary Comparison, echo=FALSE, fig.width= 10, fig.height = 6}
+plot(gha_compare)
+```
+
 --- 
 
 #### GDP Growth and Inflation
-* Average annual growth was 6.8 percent  
+* Average annual growth was 6.8 percent from 2005 - 2017
 * In 2017, Ghana was one of the fastest growing economies in the world
 * Weaker fiscal and monetary policies, terms of trade shocks from lower oil prices, and electricity rationing slowed growth to an average of approximately 5 percent between 2014 and 2017
 
@@ -415,7 +429,7 @@ plot(gdp_growth)
 
 ---  
 
-```{r GDP Composition, fig.width = 10, fig.height = 4, echo = FALSE}
+```{r GDP Composition, fig.width = 10, fig.height = 5, echo = FALSE}
 plot(gdp_shares)
 ```
 
@@ -434,7 +448,7 @@ smallest region in Ghana in terms of population.
 
 ---  
 
-```{r Poverty, fig.width= 10, fig.height=5, echo=FALSE}
+```{r Poverty, fig.width= 10, fig.height=6, echo=FALSE}
 plot(pov_plot)
 ```
 
@@ -442,13 +456,13 @@ plot(pov_plot)
 
 #### Inequality has Increased in the North
 * Fundamental cause of rising poverty in the Volta and three Northern regions is lack of
-economic growth in these regions
+economic growth 
 * Inequality is highest in the Upper West and Northern Regions
 * In the Northern Region and Upper East Region, poverty increased because both the growth and redistribution deteriorated
 
 ---
 
-```{r Inequality, fig.width= 10, fig.height=6, echo=FALSE}
+```{r Inequality, fig.width= 10, fig.height=6, fig.asp = 0.8, echo=FALSE}
 plot(gini_plot)
 ```
 
@@ -521,14 +535,5 @@ plot(stunting_map)
 plot(stunting_plot)
 ```
 
-#### As of 2018, Ghana now has 16 Administrative Regions
-* Statistics reported above are from surveys based on 10 administrative regions
-* New surveys will likely be powered to be respresentative for each of the 16 regions
-* This finer geographic detail will help further highlight geographic differences in development outcomes
 
----  
-
-```{r Boundary Comparison, echo=FALSE, fig.width= 10, fig.height = 6}
-plot(gha_compare)
-```
 
