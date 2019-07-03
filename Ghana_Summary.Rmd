@@ -28,6 +28,8 @@ y_axix_pct <- list( scale_y_continuous(
 # Change names to read as character vector not factor for mergabliity later on
 gha_sf1_new <- st_read(file.path(datapath, "Admin1", "Admin1.shp"), stringsAsFactors = FALSE)
 
+gha_sf0 <- st_read(file.path(datapath, "Admin0", "Admin0.shp"))
+
 # Create old Regions to make maps with; Plot below to check how they look
 gha_sf1 <- 
   st_read(file.path(datapath, "Admin2", "Admin2.shp"), stringsAsFactors = FALSE) %>% 
@@ -204,6 +206,7 @@ fertility_plot <- gha_df$Fertility_Region %>%
   facet_wrap(~indicator_sort, scales = "free") +
   scale_fill_identity() +
   theme_line +
+  theme(panel.spacing = unit(1, "lines")) +
   y_axix_pct + 
   labs(title = "Family planning and birth rates by region",
        subtitle = "Note free scales to accomodate indicator ranges",
@@ -393,7 +396,7 @@ gha_compare <- ggpubr::ggarrange(gha_map_old, gha_map_new,
                                 nrow = 1, align = "h") %>% 
   annotate_figure(., top = text_grob("Ghana gained six new geographic regions in 2018", 
                                      size = 16, hjust = 1))  
-                             
+
 ```
 
 ---  
@@ -492,7 +495,7 @@ plot(access_plot)
 
 ---  
 
-```{r Fertility, fig.width= 10, fig.height=7, echo=FALSE}
+```{r Fertility, fig.width= 10, fig.height=7, fig.asp = 0.8, echo=FALSE}
 plot(fertility_plot)
 ```
 
@@ -524,7 +527,7 @@ plot(ict_plot)
 
 ---  
 
-#### Delcining Chronic Child Malnutrition throughout Ghana  
+#### Declining Chronic Child Malnutrition throughout Ghana  
 * Stunting has decline in recent years, but remains high in Northern Region 
 * Ghana has some of the lowest stunting rates in West Africa  
 
