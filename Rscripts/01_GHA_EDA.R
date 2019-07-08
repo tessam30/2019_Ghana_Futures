@@ -146,15 +146,31 @@ pov_map <-
   gha_sf1 %>%
   left_join(gha_df$Poverty_region, by = c("Region")) %>% 
   filter(Indicator == "Poverty incidence") %>% 
+  mutate(lon = map_dbl(geometry, ~st_centroid(.x)[[1]]),
+         lat = map_dbl(geometry, ~st_centroid(.x)[[2]]),
+         Value = Value / 100,
+         map_label = ifelse(Year == 2006, Region, NA)) %>% 
   ggplot() +
-  geom_sf(aes(fill = Value), colour = "white", size = 0.1) + facet_wrap(~Year) +
-  scale_fill_viridis_c(option = "C", direction = -1) +
+  geom_sf(aes(fill = Value), colour = "white", size = 0.0) + 
+  geom_text(aes(label = map_label, x = lon, y = lat), color = "white") + 
+  facet_wrap(~Year) +
+  scale_fill_viridis_c(option = "A", direction = -1, alpha = 0.90,
+                       labels = scales::percent_format(accuracy = 1)) +
   labs(title = "Upper West region has the highest poverty levels",
-       subtitle = subtitle,
+       subtitle = "Poverty ",
        x = "", y = "",
        fill = "Poverty rate") + 
-  theme_minimal()
+  theme_minimal() +
+  theme(legend.position = "top",
+        strip.text.x = element_text(hjust = 0),
+        panel.background = element_rect(fill = grey20K,
+                                        colour = "#ffffff",
+                                        size = 0, linetype = "solid"))
 
+ggsave(file.path(imagepath, "GHA_poverty_plot.png"),
+       pov_map, device = "png",
+       dpi = "retina",
+       height = 8.5, width = 11, units = c("in"))
 
 
 gini_plot <- 
@@ -262,6 +278,36 @@ access_plot <-
          subtitle = "Electricity access has grown faster than improved toilet access",
          caption = "Source: 2017 Ghana Living Standards Survey")
     
+
+access_map <- gha_sf1 %>% 
+  left_join(gha_df$Service_Access, by = c("Region")) %>% 
+  filter(Year == 2017) %>% 
+  mutate(lon = map_dbl(geometry, ~st_centroid(.x)[[1]]),
+         lat = map_dbl(geometry, ~st_centroid(.x)[[2]])) %>% 
+  ggplot() +
+  geom_sf(aes(fill = Value), size = 0) +
+  geom_text(aes(label = Region, x = lon, y = lat), colour = "white") + 
+  facet_wrap(~Indicator) +
+  scale_fill_viridis_c(option = "A", direction = -1, alpha = 0.90,
+                       labels = scales::percent_format(accuracy = 1)) +
+  labs(title = "Access to electricity and improved toilets lags behind in the North",
+       subtitle = "Darker colors represent greater levels of access",
+       x = "", y = "",
+       fill = "Percent of households with access") + 
+  theme_minimal() +
+  theme(legend.position = "top",
+        strip.text.x = element_text(hjust = 0, size = 12),
+        panel.background = element_rect(fill = grey20K,
+                                        colour = "#ffffff",
+                                        size = 0, linetype = "solid"))
+
+
+ggsave(file.path(imagepath, "GHA_access_plot.png"),
+       access_map, device = "png",
+       dpi = "retina",
+       height = 8.5, width = 11, units = c("in"))
+
+
     
 
 # ICT Use -----------------------------------------------------------------
@@ -293,7 +339,7 @@ gha_df$`ICT USe` %>%
     mutate(Region_sort = fct_reorder(Region, male),
            diff = male - female) %>% 
     ggplot(aes(x = female, xend = male, y = Region_sort)) +
-    geom_dumbbell( colour_x="#fc8d62", 
+    geom_dumbbell( colour_x ="#fc8d62", 
                    colour_xend = "#a6d854", 
                    color = grey40K,
                    size = 2,
@@ -319,7 +365,7 @@ gha_df$`ICT USe` %>%
     mutate(Region_sort = fct_reorder(Region, male),
            diff = male - female) %>% 
     ggplot(aes(x = female, xend = male, y = Region_sort)) +
-    geom_dumbbell(colour_x="#fc8d62", size = 2,
+    geom_dumbbell(colour_x ="#fc8d62", size = 2,
                    colour_xend = "#a6d854", 
                    color = grey40K,
                    size_x = 6,
