@@ -14,6 +14,7 @@ dir.create("Graphics")
 dir.create("Dataout")
 dir.create("Rscripts")
 dir.create("docs")
+dir.create("Images")
 
 # Set up file path shortcuts
 datapath <- "Data"
