@@ -207,8 +207,8 @@ fertility_plot <- gha_df$Fertility_Region %>%
   scale_x_reordered() +
   facet_wrap(~indicator_sort, scales = "free") +
   scale_fill_identity() +
-  theme_line +
-  y_axix_pct + 
+  theme_line() +
+  y_axix_pct() + 
   labs(title = "Family planning and birth rates by region",
        subtitle = "Note free scales to accomodate indicator ranges",
        x = "", y = "",
