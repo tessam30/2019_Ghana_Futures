@@ -23,7 +23,9 @@ sp_df <-
          flag = ifelse(Workshop %in% c("Kumasi", "Accra Civil Society", "Tamale", "Cape Coast"), 1, 0)) 
 
 
-
+sp_df %>% 
+  count(Driver_group, sort = TRUE, wt = score) %>% 
+  print(n = 25)
 
 plot_text <- sp_df %>% 
   filter(flag == 1) %>% 
@@ -45,6 +47,8 @@ plot_text <- sp_df %>%
 plot_text
 plot_notext
   
+
+
 ggsave(file.path(imagepath, "GHA_cluster_results_text.png"),
        plot = plot_text,
        device = "png",
