@@ -20,7 +20,7 @@ sp_df <-
   mutate(Workshop = fct_reorder(Workshop, total_score, .desc = TRUE),
          driver = reorder_within(Driver_group, score, Workshop),
          scenario_color = ifelse(Scenario == 1, "#80cdc1", grey30K),
-         flag = ifelse(Workshop %in% c("Kumasi", "Accra Civil Society", "Tamale", "Cape Coast"), 1, 0)) 
+         flag = ifelse(Workshop %in% c("Kumasi", "Accra Civil Society", "Tamale", "Cape Coast", "Accra USAID"), 1, 0)) 
 
 
 sp_df %>% 
