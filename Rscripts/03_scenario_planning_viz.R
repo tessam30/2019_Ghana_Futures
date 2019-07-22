@@ -35,10 +35,9 @@ plot_text <- sp_df %>%
   facet_wrap(~Workshop, scales = "free_y", ncol = 2) +
   theme_minimal() +
   scale_fill_identity() +
-  theme(strip.text = element_text(colour = grey90K, hjust = 0, size = 12), 
+  # colour = "white" if using the plot_notext option
+  theme(strip.text = element_text(colour = grey90K , hjust = 0, size = 12), 
                                   legend.position = "top") +
-  # theme(strip.text = element_text(hjust = 0),
-  #       legend.position = "top") +
   labs(title = "Education and Governance were the most popular clusters",
        x = "",
        y = "",
@@ -46,11 +45,9 @@ plot_text <- sp_df %>%
        fill = "Scenario driver")
 plot_text
 plot_notext
-  
 
-
-ggsave(file.path(imagepath, "GHA_cluster_results_text.png"),
-       plot = plot_text,
+ggsave(file.path(imagepath, "GHA_cluster_results_notext.png"),
+       plot = plot_notext,
        device = "png",
        height = 9, 
        width = 16, 
@@ -59,19 +56,19 @@ ggsave(file.path(imagepath, "GHA_cluster_results_text.png"),
 
  
 
-sp_df %>% 
-  ggplot(aes(y = share, x = driver, group = Workshop)) +
-  coord_flip() + geom_col() +
-  scale_x_reordered() +
-  scale_y_continuous(limits = c(0, 0.75),
-                     labels = scales::percent_format(accuracy = 1)) +
-  facet_wrap(~Workshop, scales = "free_y") +
-  theme_minimal() +
-  theme(strip.text = element_text(hjust = 0)) +
-  labs(title = "Education and Governance were the most popular drivers",
-       x = "",
-       y = "total votes",
-       caption = "Source: Voting results from scenario planning workshops.")
+# sp_df %>% 
+#   ggplot(aes(y = share, x = driver, group = Workshop)) +
+#   coord_flip() + geom_col() +
+#   scale_x_reordered() +
+#   scale_y_continuous(limits = c(0, 0.75),
+#                      labels = scales::percent_format(accuracy = 1)) +
+#   facet_wrap(~Workshop, scales = "free_y") +
+#   theme_minimal() +
+#   theme(strip.text = element_text(hjust = 0)) +
+#   labs(title = "Education and Governance were the most popular drivers",
+#        x = "",
+#        y = "total votes",
+#        caption = "Source: Voting results from scenario planning workshops.")
 
 
 
