@@ -70,7 +70,7 @@ life_exp_plot <-
   labs(title = "Life Expectancy at Age 10 1950 - 2095", 
        x = "", y = "") +
   geom_text_repel(aes(label = label),
-                  nudge_x = 1,
+                  nudge_x = 3,
                   na.rm = TRUE, segment.size = 0) +
   scale_x_continuous(limits = c(1950, 2130), breaks = seq(1950, 2130, 50)) +
   scale_color_manual(values = c("#fdb462", "#fb8072", "#bebada", "#80b1d3")) +
