@@ -1,4 +1,4 @@
-pacman::p_load("tidyverse", "purrr", "llamar", "ggrepel")
+pacman::p_load("tidyverse", "purrr", "llamar", "ggrepel", "extrafont", "extrafontdb")
 
 
 # Set ggplot themes up
@@ -66,16 +66,17 @@ life_exp_sub <-
 life_exp_plot <- 
   life_exp_sub %>% 
   ggplot(aes(x = Year, y = e10, group = Entity, colour = Entity)) + 
+  geom_vline(xintercept = 2015, colour = grey20K, size = 1) +
   geom_line() +
   geom_point(aes(fill = Entity), size = 4, colour = "white", shape = 21) +
   theme_line +
-  labs(title = "Life Expectancy at Age 10 1950 - 2095", 
+  labs(title = "Life Expectancy at Age 10, 1950 - 2095", 
        x = "", y = "") +
   geom_text_repel(aes(label = label),
                   nudge_x = 3,
                   na.rm = TRUE, segment.size = 0) +
   scale_x_continuous(limits = c(1950, 2130), breaks = seq(1950, 2130, 50)) +
-  scale_y_continuous(limits = c(0, 90), breaks = seq(0, 90, 15)) + 
+  scale_y_continuous(limits = c(45, 90), breaks = seq(0, 90, 15)) + 
   scale_color_manual(values = c("#fdb462", "#fb8072", "#bebada", "#80b1d3")) +
   scale_fill_manual(values = c("#fdb462", "#fb8072", "#bebada", "#80b1d3"))
 
@@ -85,5 +86,5 @@ ggsave("~/Documents/USAID/SP_life_exp_plot.pdf",
        device = "pdf",
        dpi = "retina",
        height = 2.5, width = 9.5, units = c("in"),
-       useDingbats=FALSE)
+       useDingbats = FALSE)
 
