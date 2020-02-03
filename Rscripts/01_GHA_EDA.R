@@ -383,7 +383,7 @@ gha_df$`ICT USe` %>%
 
 # Maps -------------------------------------------------------------
 
-# Compare boundaries to show differences and introduce the repurcussions for new statistics
+# Compare boundaries to show differences and introduce the repercussions for new statistics
     colour_count <- length(unique(gha_sf1$Region))
     mycolours <- colorRampPalette(RColorBrewer::brewer.pal(9, "Spectral"))(colour_count)    
     
